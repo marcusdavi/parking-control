@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.api.parkingcontrol.dtos.ParkingSpotDto;
 import com.api.parkingcontrol.exceptions.NegocioException;
+import com.api.parkingcontrol.exceptions.ResourceNotFoundException;
 import com.api.parkingcontrol.models.ParkingSpotModel;
 import com.api.parkingcontrol.repositories.ParkingSpotRepository;
 import com.api.parkingcontrol.services.ParkingSpotService;
@@ -49,7 +50,7 @@ public class ParkingSpotServiceImpl implements ParkingSpotService {
     @Transactional
     public ParkingSpotModel create(ParkingSpotDto parkingSpotDto) {
 
-	validBusinessRuleSave(parkingSpotDto);
+	validBusinessRuleNewParkingSpot(parkingSpotDto);
 
 	return createParkingSpot(parkingSpotDto);
     }
@@ -58,14 +59,13 @@ public class ParkingSpotServiceImpl implements ParkingSpotService {
     public ParkingSpotModel update(UUID id, @Valid ParkingSpotDto parkingSpotDto) {
 
 	validParkingSpotExistence(id);
-	validBusinessRuleSave(parkingSpotDto);
 
 	return updateParkingSpot(id, parkingSpotDto);
     }
 
     private void validParkingSpotExistence(UUID id) {
 	if (!existsParkingSpot(id)) {
-	    throw new NegocioException("Conflict: Parking Spot Not Exists!");
+	    throw new ResourceNotFoundException("Conflict: Parking Spot Not Exists!");
 	}
     }
 
@@ -90,7 +90,7 @@ public class ParkingSpotServiceImpl implements ParkingSpotService {
 	return repository.save(parkinSpotModel);
     }
 
-    private void validBusinessRuleSave(ParkingSpotDto parkingSpotDto) {
+    private void validBusinessRuleNewParkingSpot(ParkingSpotDto parkingSpotDto) {
 
 	if (existsByLicensePlateCar(parkingSpotDto.getLicensePlateCar())) {
 	    throw new NegocioException("Conflict: License Plate Car is already in use!");
